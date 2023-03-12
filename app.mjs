@@ -1,9 +1,9 @@
 import * as dotenv from 'dotenv';
+import md5 from 'md5';
 dotenv.config()
 import express from "express";
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
-import encrypt from "mongoose-encryption";
 const url = "mongodb://127.0.0.1:27017/secrets";
 const app = express();
 app.use(express.static("public"));
@@ -14,7 +14,6 @@ const schema = new mongoose.Schema({
     email:String,
     password:String
 });
-schema.plugin(encrypt,{secret:process.env.SECRET,encryptedFields: ["password"]});
 const Notes = mongoose.model('note',schema);
 app.get('/',(req,res)=>{
     res.render('home');
@@ -25,7 +24,7 @@ app.get('/:pageName',(req,res)=>{
 })
 app.post("/register", (req,res)=>{
     const user = req.body.username;
-    const pass = req.body.password;
+    const pass = md5(req.body.password);
     const newUser = new Notes({// Level 1 encription just storing the username and password in Db;
         email:user,
         password:pass
@@ -35,7 +34,7 @@ app.post("/register", (req,res)=>{
 })
 app.post("/login", (req,res)=>{
     const user = req.body.username;
-    const pass = req.body.password;
+    const pass = md5(req.body.password);
     Notes.findOne({email:user}).then(data=>{
         if(data){
             if(data.password === pass){
