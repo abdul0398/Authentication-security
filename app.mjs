@@ -1,3 +1,5 @@
+import * as dotenv from 'dotenv';
+dotenv.config()
 import express from "express";
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
@@ -12,17 +14,13 @@ const schema = new mongoose.Schema({
     email:String,
     password:String
 });
-const secret = "thisisthesecretthatneedstobeknowntoaccessDb"
-schema.plugin(encrypt,{secret:secret,encryptedFields: ["password"]});
+schema.plugin(encrypt,{secret:process.env.SECRET,encryptedFields: ["password"]});
 const Notes = mongoose.model('note',schema);
-app.listen(3000,()=>{
-    console.log("Server Started Successfully...");
-})
 app.get('/',(req,res)=>{
     res.render('home');
 })
 app.get('/:pageName',(req,res)=>{
-    if(req.params.pageName == 'ico')return;
+    if(req.params.pageName === 'ico')return;
     res.render(req.params.pageName);
 })
 app.post("/register", (req,res)=>{
@@ -53,4 +51,7 @@ app.post("/login", (req,res)=>{
         console.log(err);
     })
    
+})
+app.listen(3000,()=>{
+    console.log("Server Started Successfully...");
 })
